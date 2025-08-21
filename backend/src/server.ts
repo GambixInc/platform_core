@@ -3,42 +3,53 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { S3Client, ListBucketsCommand } from "@aws-sdk/client-s3"
 import { DynamoDBClient, ListTablesCommand } from "@aws-sdk/client-dynamodb"
+import { config, getJson } from "serpapi"
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.EXPRESS_PORT;
+// const serpApiKey = process.env.SERP_API_KEY;
 
-const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID
-if (!AWS_ACCESS_KEY_ID) {
-  throw new Error('❌ AWS_ACCESS_KEY_ID environment variable is required');
-}
+// const serpParams = {
+//   engine: "google",
+//   q: "Coffee",
+//   api_key: serpApiKey,
+// };
 
-const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY
-if (!AWS_SECRET_ACCESS_KEY) {
-  throw new Error('❌ AWS_SECRET_ACCESS_KEY environment variable is required');
-}
+// const serpResponse = await getJson(serpParams);
+// console.log(serpResponse);
 
-const AWS_REGION = process.env.AWS_REGION
-if (!AWS_REGION) {
-  throw new Error('❌ AWS_REGION environment variable is required');
-}
+// const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID
+// if (!AWS_ACCESS_KEY_ID) {
+//   throw new Error('❌ AWS_ACCESS_KEY_ID environment variable is required');
+// }
 
-const s3Client = new S3Client({
-  region: AWS_REGION,
-  credentials: {
-    accessKeyId: AWS_ACCESS_KEY_ID!, 
-    secretAccessKey: AWS_SECRET_ACCESS_KEY!,
-  }
-});
+// const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY
+// if (!AWS_SECRET_ACCESS_KEY) {
+//   throw new Error('❌ AWS_SECRET_ACCESS_KEY environment variable is required');
+// }
 
-const dynamoDBClient = new DynamoDBClient({
-  region: AWS_REGION,
-  credentials: {
-    accessKeyId: AWS_ACCESS_KEY_ID!,
-    secretAccessKey: AWS_SECRET_ACCESS_KEY!,
-  }
-});
+// const AWS_REGION = process.env.AWS_REGION
+// if (!AWS_REGION) {
+//   throw new Error('❌ AWS_REGION environment variable is required');
+// }
+
+// const s3Client = new S3Client({
+//   region: AWS_REGION,
+//   credentials: {
+//     accessKeyId: AWS_ACCESS_KEY_ID!, 
+//     secretAccessKey: AWS_SECRET_ACCESS_KEY!,
+//   }
+// });
+
+// const dynamoDBClient = new DynamoDBClient({
+//   region: AWS_REGION,
+//   credentials: {
+//     accessKeyId: AWS_ACCESS_KEY_ID!,
+//     secretAccessKey: AWS_SECRET_ACCESS_KEY!,
+//   }
+// });
 
 // const s3ListBucketCommand = new ListBucketsCommand();
 // const s3Response = await s3Client.send(s3ListBucketCommand);
