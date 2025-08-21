@@ -1,7 +1,8 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { S3Client } from "@aws-sdk/client-s3"
+import { S3Client, ListBucketsCommand } from "@aws-sdk/client-s3"
+import { DynamoDBClient, ListTablesCommand } from "@aws-sdk/client-dynamodb"
 
 dotenv.config();
 
@@ -31,6 +32,21 @@ const s3Client = new S3Client({
   }
 });
 
+const dynamoDBClient = new DynamoDBClient({
+  region: AWS_REGION,
+  credentials: {
+    accessKeyId: AWS_ACCESS_KEY_ID!,
+    secretAccessKey: AWS_SECRET_ACCESS_KEY!,
+  }
+});
+
+// const s3ListBucketCommand = new ListBucketsCommand();
+// const s3Response = await s3Client.send(s3ListBucketCommand);
+// console.log(s3Response)
+
+// const dydbListTableCommand = new ListTablesCommand();
+// const dydbResponse = await dynamoDBClient.send(dydbListTableCommand)
+// console.log(dydbResponse)
 
 // Middleware
 app.use(
