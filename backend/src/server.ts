@@ -3,12 +3,41 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { S3Client, ListBucketsCommand } from "@aws-sdk/client-s3"
 import { DynamoDBClient, ListTablesCommand } from "@aws-sdk/client-dynamodb"
+import { CognitoIdentityProviderClient, InitiateAuthCommand, RespondToAuthChallengeCommand } from "@aws-sdk/client-cognito-identity-provider"
 import { config, getJson } from "serpapi"
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.EXPRESS_PORT;
+const port = process.env.EXPRESS_PORT;
+const awsRegion = process.env.AWS_REGION
+const userPoolId = process.env.AWS_COGNITO_USER_POOL_ID 
+const clientId = process.env.AWS_COGNITO_CLIENT_ID
+const username =  process.env.USERNAME
+const password =  process.env.PASSWORD
+
+if (!awsRegion || !userPoolId || !clientId) {
+  throw new Error('❌ Missing required Cognito environment variables');
+}
+
+const congnitoClient = new CognitoIdentityProviderClient({region: awsRegion});
+const input = {
+  UserPoolId: userPoolId,
+  AttributesToGet: ["email", "name"],
+  Limit: 5,
+};
+
+const loginCommand= new InitiateAuthCommand({
+  AuthFlow: "USER_PASSWORD_AUTH",
+  ClientId: clientId,
+  AuthParameters: {
+    USERNAME: username,
+    PASSWORD: password,
+  },
+});
+const cognitoResponse = await congnitoClient.send(cognitoCommand);
+console.log(cognitoResponse);
+
 // const serpApiKey = process.env.SERP_API_KEY;
 
 // const serpParams = {
@@ -30,13 +59,12 @@ const PORT = process.env.EXPRESS_PORT;
 //   throw new Error('❌ AWS_SECRET_ACCESS_KEY environment variable is required');
 // }
 
-// const AWS_REGION = process.env.AWS_REGION
-// if (!AWS_REGION) {
-//   throw new Error('❌ AWS_REGION environment variable is required');
+// if (!awsRegion) {
+//   throw new Error('❌ awsRegion environment variable is required');
 // }
 
 // const s3Client = new S3Client({
-//   region: AWS_REGION,
+//   region: awsRegion,
 //   credentials: {
 //     accessKeyId: AWS_ACCESS_KEY_ID!, 
 //     secretAccessKey: AWS_SECRET_ACCESS_KEY!,
@@ -44,7 +72,7 @@ const PORT = process.env.EXPRESS_PORT;
 // });
 
 // const dynamoDBClient = new DynamoDBClient({
-//   region: AWS_REGION,
+//   region: awsRegion,
 //   credentials: {
 //     accessKeyId: AWS_ACCESS_KEY_ID!,
 //     secretAccessKey: AWS_SECRET_ACCESS_KEY!,
@@ -78,6 +106,6 @@ app.get("/aws", (req, res) =>{
   res.json({message: "AWS Services endpoint"});
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+app.listen(port, () => {
+  console.log(`Server running on http://localhost:${port}`);
 });
