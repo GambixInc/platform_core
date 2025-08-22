@@ -3,40 +3,42 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { S3Client, ListBucketsCommand } from "@aws-sdk/client-s3"
 import { DynamoDBClient, ListTablesCommand } from "@aws-sdk/client-dynamodb"
-import { CognitoIdentityProviderClient, InitiateAuthCommand, RespondToAuthChallengeCommand } from "@aws-sdk/client-cognito-identity-provider"
+import jwt from 'jsonwebtoken';
+// import { CognitoIdentityProviderClient, InitiateAuthCommand, RespondToAuthChallengeCommand } from "@aws-sdk/client-cognito-identity-provider"
 import { config, getJson } from "serpapi"
 
 dotenv.config();
 
 const app = express();
 const port = process.env.EXPRESS_PORT;
-const awsRegion = process.env.AWS_REGION
-const userPoolId = process.env.AWS_COGNITO_USER_POOL_ID 
-const clientId = process.env.AWS_COGNITO_CLIENT_ID
-const username =  process.env.USERNAME
-const password =  process.env.PASSWORD
+const awsRegion = process.env.AWS_REGION;
+const userPoolId = process.env.AWS_COGNITO_USER_POOL_ID ;
+const clientId = process.env.AWS_COGNITO_CLIENT_ID;
+const cognitoPublicKey = process.env.COGNITO_PUBLIC_KEY;
+// const username =  process.env.USERNAME
+// const password =  process.env.PASSWORD
 
-if (!awsRegion || !userPoolId || !clientId) {
-  throw new Error('❌ Missing required Cognito environment variables');
-}
+// if (!awsRegion || !userPoolId || !clientId) {
+//   throw new Error('❌ Missing required Cognito environment variables');
+// }
 
-const congnitoClient = new CognitoIdentityProviderClient({region: awsRegion});
-const input = {
-  UserPoolId: userPoolId,
-  AttributesToGet: ["email", "name"],
-  Limit: 5,
-};
+// const congnitoClient = new CognitoIdentityProviderClient({region: awsRegion});
+// const input = {
+//   UserPoolId: userPoolId,
+//   AttributesToGet: ["email", "name"],
+//   Limit: 5,
+// };
 
-const loginCommand= new InitiateAuthCommand({
-  AuthFlow: "USER_PASSWORD_AUTH",
-  ClientId: clientId,
-  AuthParameters: {
-    USERNAME: username,
-    PASSWORD: password,
-  },
-});
-const cognitoResponse = await congnitoClient.send(cognitoCommand);
-console.log(cognitoResponse);
+// const loginCommand= new InitiateAuthCommand({
+//   AuthFlow: "USER_PASSWORD_AUTH",
+//   ClientId: clientId,
+//   AuthParameters: {
+//     USERNAME: username,
+//     PASSWORD: password,
+//   },
+// });
+// const cognitoResponse = await congnitoClient.send(cognitoCommand);
+// console.log(cognitoResponse);
 
 // const serpApiKey = process.env.SERP_API_KEY;
 
@@ -104,6 +106,43 @@ app.get("/", (req, res) => {
 
 app.get("/aws", (req, res) =>{
   res.json({message: "AWS Services endpoint"});
+});
+
+
+// Define proper types
+interface AuthenticatedUser {
+  sub: string;
+  email: string;
+  name?: string;
+  // Add other Cognito user attributes as needed
+}
+
+// Make user optional in the interface
+interface AuthenticatedRequest extends express.Request {
+  user?: AuthenticatedUser; // Make it optional
+}
+
+// Update the middleware with proper typing
+const verifyJWT = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+  
+  try {
+    const decoded = jwt.verify(token, cognitoPublicKey!) as AuthenticatedUser;
+    (req as AuthenticatedRequest).user = decoded;
+    next();
+  } catch (error) {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+};
+
+// Use type assertion in the route handler
+app.get('/api/protected', verifyJWT, (req: express.Request, res: express.Response) => {
+  const authenticatedReq = req as AuthenticatedRequest;
+  res.json({ data: 'protected', user: authenticatedReq.user });
 });
 
 app.listen(port, () => {
