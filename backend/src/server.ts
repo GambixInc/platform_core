@@ -6,6 +6,8 @@ import { DynamoDBClient, ListTablesCommand } from "@aws-sdk/client-dynamodb"
 import jwt from 'jsonwebtoken';
 // import { CognitoIdentityProviderClient, InitiateAuthCommand, RespondToAuthChallengeCommand } from "@aws-sdk/client-cognito-identity-provider"
 import { config, getJson } from "serpapi"
+import axios from 'axios';
+import jwksClient from 'jwks-rsa';
 
 dotenv.config();
 
@@ -14,7 +16,7 @@ const port = process.env.EXPRESS_PORT;
 const awsRegion = process.env.AWS_REGION;
 const userPoolId = process.env.AWS_COGNITO_USER_POOL_ID ;
 const clientId = process.env.AWS_COGNITO_CLIENT_ID;
-const cognitoPublicKey = process.env.COGNITO_PUBLIC_KEY;
+const cognitoPublicKey = `https://cognito-idp.${awsRegion}.amazonaws.com/${userPoolId}/.well-known/jwks.json`;
 // const username =  process.env.USERNAME
 // const password =  process.env.PASSWORD
 
