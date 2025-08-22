@@ -16,7 +16,13 @@ const port = process.env.EXPRESS_PORT;
 const awsRegion = process.env.AWS_REGION;
 const userPoolId = process.env.AWS_COGNITO_USER_POOL_ID ;
 const clientId = process.env.AWS_COGNITO_CLIENT_ID;
+const crawlerFuncUrl = process.env.CRAWLER_FUNC_URL;
 const cognitoPublicKey = `https://cognito-idp.${awsRegion}.amazonaws.com/${userPoolId}/.well-known/jwks.json`;
+
+const crawlUrl = "https://strata.cx/"
+const user_id="3b5909ef-8a04-4b71-9aa7-ab4ca45e7ca7"
+
+fetch(crawlerFuncUrl+"?url="+crawlUrl+"&user_id="+user_id).then(res => res.json()).then(data =>console.log(data));
 // const username =  process.env.USERNAME
 // const password =  process.env.PASSWORD
 
@@ -146,6 +152,18 @@ app.get('/api/protected', verifyJWT, (req: express.Request, res: express.Respons
   const authenticatedReq = req as AuthenticatedRequest;
   res.json({ data: 'protected', user: authenticatedReq.user });
 });
+
+// app.get("", async (req, res) => {
+//   try {
+
+//   } catch (error) {
+//     console.error("Crawler error", error);
+//     res.status(500).json({
+//       error: "Failed to crawl URl",
+//       details: error instanceof Error ? error.message : "Unknow error"
+//     });
+//   }
+// });
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);

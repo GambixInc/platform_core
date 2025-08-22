@@ -4,7 +4,7 @@
 export const config = {
   // Lambda Configuration
   lambda: {
-    url: import.meta.env.VITE_CRAWLER_FUNC_URL,
+    // url: import.meta.env.VITE_CRAWLER_FUNC_URL,
   },
   
   // AWS Amplify Configuration
